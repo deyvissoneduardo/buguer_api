@@ -57,22 +57,22 @@ trait ApiHandler
     protected function authenticationException(
         AuthenticationException|TokenBlacklistedException $e
     ): JsonResponse {
-        return RequestResponse::error($e->getMessage(), ['code' => $e->getCode(), 'message' => $e->getMessage()], Response::HTTP_UNAUTHORIZED);
+        return RequestResponse::error($e->getMessage(), ['message' => $e->getMessage()], Response::HTTP_UNAUTHORIZED);
     }
 
     protected function authorizationException(
         AuthorizationException $e
     ): JsonResponse {
-        return RequestResponse::error($e->getMessage(), ['code' => $e->getCode(), 'message' => $e->getMessage()], Response::HTTP_UNAUTHORIZED);
+        return RequestResponse::error($e->getMessage(), ['message' => $e->getMessage()], Response::HTTP_UNAUTHORIZED);
     }
 
     protected function httpException(HttpException $e): JsonResponse
     {
-        return RequestResponse::error($e->getMessage(), ['code' => $e->getCode(), 'message' => $e->getMessage()], $e->getStatusCode());
+        return RequestResponse::error($e->getMessage(), ['message' => $e->getMessage()], $e->getStatusCode());
     }
 
     protected function genericException(\Throwable $e): JsonResponse
     {
-        return RequestResponse::error('Internal Server Error', ['code' => $e->getCode(), $e->getLine(), $e->getFile() ,'message' => $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+        return RequestResponse::error('Internal Server Error', ['message' => $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
     }
 }

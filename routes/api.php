@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ProductsController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -26,4 +27,9 @@ Route::group(['middleware' => 'api'], function ($router) {
     Route::post('refresh', [AuthController::class, 'refresh']);
     Route::post('me', [AuthController::class, 'me']);
     Route::get('users', [AuthController::class, 'index']);
+
+    Route::get('products', [ProductsController::class, 'index']);
+    Route::post('products', [ProductsController::class, 'create']);
+    Route::put('products/{id_product}', [ProductsController::class, 'edit']);
+    Route::delete('products', [ProductsController::class, 'destroy']);
 });
