@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('test', function () {
-    return 'Hello Word';
+    return response()->json(['result' => ['data' => 'Hello Word']], 200);
 });
 
 Route::group(['middleware' => 'api'], function ($router) {

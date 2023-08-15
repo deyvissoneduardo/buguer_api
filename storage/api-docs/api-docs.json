@@ -1,0 +1,21 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "API",
+        "version": "1.0"
+    },
+    "paths": {
+        "/api": {},
+        "/api/index": {
+            "get": {
+                "summary": "Lista",
+                "operationId": "71bb82714b29dab77dfbffee796e88eb",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        }
+    }
+}
