@@ -10,114 +10,103 @@ use App\Models\Products;
 use Dotenv\Exception\ValidationException;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
+use PhpParser\Node\Stmt\TryCatch;
 
 class ProductsController extends Controller
 {
-
-    public function __construct()
-    {
-        $this->middleware('auth:api');
-    }
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        return RequestResponse::success(Products::all());
+        try {
+            $products = Products::all();
+            return RequestResponse::success($products);
+        } catch (\Exception $e) {
+            return RequestResponse::error('Internal Server Error', $e, Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create(StoreProductsRequest $request)
     {
         try {
-            $product = Products::create([
+            $product = new Products([
                 'name' => $request->name,
                 'price' => $request->price,
                 'description' => $request->description,
             ]);
 
+            if ($request->hasFile('photo')) {
+                $photo = $request->file('photo');
+                $photoPath = $photo->storeAs('photos', uniqid() . '.' . $photo->getClientOriginalExtension(), 'public');
+                $product->photo = $photoPath;
+            }
+
+            $product->save();
+
             return RequestResponse::success($product);
         } catch (ValidationException $e) {
-            return RequestResponse::error('Validation Error', $e->getMessage());
+            return RequestResponse::error('Validation Error', $e);
         } catch (\Exception $e) {
             return RequestResponse::error('Internal Server Error', $e, Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreProductsRequest $request)
-    {
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Products $products)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(String $id, StoreProductsRequest $request)
+    public function show($id)
     {
         try {
-            if (!$id) {
-                return RequestResponse::error([], 'Bad Request');
-            }
-
             $product = Products::find($id);
             if (!$product) {
-                return RequestResponse::error([], 'Product Not Found', Response::HTTP_NOT_FOUND);
+                return RequestResponse::error('Product not found', [], Response::HTTP_NOT_FOUND);
+            }
+            return RequestResponse::success($product);
+        } catch (\Exception $e) {
+            return RequestResponse::error('Internal Server Error', $e, Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function update(UpdateProductsRequest $request, $id)
+    {
+        try {
+            dd($request->id);
+            $product = Products::find($id);
+            if (!$product) {
+                return RequestResponse::error('Product not found', [], Response::HTTP_NOT_FOUND);
             }
 
             $product->name = $request->name;
             $product->price = $request->price;
             $product->description = $request->description;
-            $product->save();
 
+            if ($request->hasFile('photo')) {
+                $photo = $request->file('photo');
+                $photoPath = $photo->storeAs('photos', uniqid() . '.' . $photo->getClientOriginalExtension(), 'public');
+                $product->photo = $photoPath;
+            }
+            $product->save();
             return RequestResponse::success($product);
         } catch (ValidationException $e) {
-            return RequestResponse::error('Validation Error', $e->getMessage());
+            return RequestResponse::error('Validation Error', $e);
         } catch (\Exception $e) {
             return RequestResponse::error('Internal Server Error', $e, Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateProductsRequest $request, Products $products)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Request $request)
+    public function destroy($id)
     {
         try {
-            if (!$request->id) {
-                return RequestResponse::error([], 'Bad Request');
-            }
-
-            $product = Products::find($request->id);
+            $product = Products::find($id);
             if (!$product) {
-                return RequestResponse::error([], 'Product Not Found', Response::HTTP_NOT_FOUND);
+                return RequestResponse::error('Product not found', [], Response::HTTP_NOT_FOUND);
             }
 
-            $product = Products::find($request->id);
-            $product->delete();
+            if ($product->photo) {
+                Storage::disk('public')->delete($product->photo);
+            }
 
-            return RequestResponse::success(['message' => 'Deleted success']);
+            $product->delete();
+            return RequestResponse::success('Product deleted successfully', Response::HTTP_ACCEPTED);
         } catch (ValidationException $e) {
-            return RequestResponse::error('Validation Error', $e->getMessage());
+            return RequestResponse::error('Validation Error', $e);
         } catch (\Exception $e) {
             return RequestResponse::error('Internal Server Error', $e, Response::HTTP_INTERNAL_SERVER_ERROR);
         }

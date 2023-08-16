@@ -30,6 +30,6 @@ Route::group(['middleware' => 'api'], function ($router) {
 
     Route::get('products', [ProductsController::class, 'index']);
     Route::post('products', [ProductsController::class, 'create']);
-    Route::put('products/{id_product}', [ProductsController::class, 'edit']);
-    Route::delete('products', [ProductsController::class, 'destroy']);
+    Route::put('products/{id_product}', [ProductsController::class, 'update']);
+    Route::delete('products/{id_product}', [ProductsController::class, 'destroy']);
 });
